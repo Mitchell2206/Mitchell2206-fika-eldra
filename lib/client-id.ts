@@ -1,0 +1,1 @@
+export function clientId(){if(typeof crypto.randomUUID==='function')return crypto.randomUUID();const a=crypto.getRandomValues(new Uint8Array(16));return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}
