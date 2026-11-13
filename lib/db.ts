@@ -40,6 +40,8 @@ export function inventoryRows(p: any): [string, string, number][] {
 async function init() {
   const db = sql();
   await db.transaction([
+    // Serializes the first boot when several instances start at once.
+    db`SELECT pg_advisory_xact_lock(4217001)`,
     db`CREATE TABLE IF NOT EXISTS entries (id text PRIMARY KEY, kind text NOT NULL, data jsonb NOT NULL, updated_at timestamptz NOT NULL DEFAULT now())`,
     db`CREATE INDEX IF NOT EXISTS entries_kind ON entries(kind)`,
     db`CREATE TABLE IF NOT EXISTS inventory (product_id text NOT NULL, aroma text NOT NULL DEFAULT '', qty integer NOT NULL CHECK (qty >= 0), PRIMARY KEY (product_id, aroma))`,
@@ -53,6 +55,7 @@ async function init() {
   if (n > 0) return;
   const rows = seed as any[];
   await db.transaction([
+    db`SELECT pg_advisory_xact_lock(4217001)`,
     ...rows.map((x) => {
       const { stock, ...data } = x;
       return db`INSERT INTO entries (id, kind, data) VALUES (${x.id}, ${x.kind}, ${JSON.stringify(data)}::jsonb) ON CONFLICT (id) DO NOTHING`;
