@@ -7,7 +7,7 @@ let client: any = null;
 let ready: Promise<void> | null = null;
 
 export function sql(): NeonQueryFunction<false, false> {
-  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.STORAGE_URL;
   if (!url) throw new Error('Falta configurar DATABASE_URL (Neon) en Vercel.');
   if (!client) client = url.startsWith('pglite:') ? localClient(url.slice(7)) : neon(url);
   return client;
